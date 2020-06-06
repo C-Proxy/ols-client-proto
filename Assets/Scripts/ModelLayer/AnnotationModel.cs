@@ -536,6 +536,7 @@ public class AnnotationModel : MonoBehaviour
         public readonly int MinY;
         public readonly int MaxY;
 
+
         public Output(string className, LabelInfo labelInfo, Vector2 center)
         {
             ClassName = className;
