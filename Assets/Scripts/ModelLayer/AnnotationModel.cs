@@ -20,6 +20,8 @@ public class AnnotationModel : MonoBehaviour
     public IObservable<(Vector2 Position, Vector2 Size)[][]> OnLoadLabels => LoadLabelsSubject;
     public IObservable<List<string>> OnLoadFiles => LoadFilesSubject;
 
+    string CurrentFileName;
+
     FileManager _FileManager;
     private void Awake()
     {
@@ -102,6 +104,7 @@ public class AnnotationModel : MonoBehaviour
     public void LoadImage(string fileName)
     {
         LoadImageSubject.OnNext(_FileManager.ReadTexture(fileName));
+        CurrentFileName = fileName;
     }
     public void LoadLabels(string fileName)
     {
@@ -117,11 +120,18 @@ public class AnnotationModel : MonoBehaviour
     }
     public void SaveLabels(string fileName)
     {
-        _FileManager.Save(fileName, LabelInfos);
+        if (fileName != "")
+            _FileManager.Save(fileName, LabelInfos);
     }
+    public void SaveLabels() => SaveLabels(CurrentFileName);
 
     public void Undo() => _ActionLogger.Undo();
     public void Redo() => _ActionLogger.Redo();
+
+    private void OnApplicationQuit()
+    {
+        SaveLabels();
+    }
 
     class FileManager
     {

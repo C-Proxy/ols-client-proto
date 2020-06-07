@@ -132,12 +132,13 @@ public class LabelObjectManager : MonoBehaviour
     public void CreateLabelObject(int classId, (Vector2, Vector2)[] infoArray)
     {
         var length = infoArray.Length;
-        for (int i = 0; i < length; i++)  
+        for (int i = 0; i < length; i++)
         {
             CreateLabelObject(classId, infoArray[i].Item1, infoArray[i].Item2);
         }
     }
-    public void ResizeLabelObject(int classId, int labelId, Vector2 newPosition, Vector2 newSize) {
+    public void ResizeLabelObject(int classId, int labelId, Vector2 newPosition, Vector2 newSize)
+    {
         var label = LabelObjects[classId][labelId];
         label.SetPosition(newPosition);
         label.SetSize(newSize);
@@ -173,7 +174,7 @@ public class LabelObjectManager : MonoBehaviour
         var newLabel = CreateLabelObject(newClassId, newLabelId, pos, size);
         RemoveLabelObject(classId, labelId);
         return newLabel;
-    }    
+    }
     public void RefreshLabels()
     {
         foreach (var list in EmptyIndexes)
@@ -195,7 +196,7 @@ public class LabelObjectManager : MonoBehaviour
         if (!Input.GetMouseButton(0))
             return;
         var onLeftUp = _InteractManager.OnMouseUp(0);
-        var drag = _InteractManager.OnUpdate.TakeUntil(onLeftUp);
+        var drag = _InteractManager.OnUpdate_Mouse.TakeUntil(onLeftUp);
 
         var prePos = ActiveLabel.localPosition;
         var preSize = ActiveLabel.sizeDelta;
@@ -316,7 +317,7 @@ public class LabelObjectManager : MonoBehaviour
     {
         start = RectClamp(start);
         ActiveLabel = CreateLabelObject(start);
-        _InteractManager.OnUpdate
+        _InteractManager.OnUpdate_Mouse
             .TakeUntil(_InteractManager.OnMouseUp(0))
             .Subscribe(pos =>
             {
@@ -342,13 +343,13 @@ public class LabelObjectManager : MonoBehaviour
 
     public void FocusActiveLabel()
     {
-        foreach (var label in LabelObjects.SelectMany(_ => _).Where(l => l != null)) 
+        foreach (var label in LabelObjects.SelectMany(_ => _).Where(l => l != null))
             label.ChangeColor_Gray();
         ActiveLabel.ChangeColor_Default();
     }
     public void DefaultColorAll()
     {
-        foreach (var label in LabelObjects.SelectMany(_ => _).Where(l => l != null)) 
+        foreach (var label in LabelObjects.SelectMany(_ => _).Where(l => l != null))
             label.ChangeColor_Default();
     }
     public void SetFlameScaleAll(float scale)

@@ -69,10 +69,10 @@ public class RxPresenter : MonoBehaviour
             }).AddTo(this);
 
         //InteractManager to AM
-        _InteractManager.OnClick_Undo
-            .Subscribe(_ => _AnnotationModel.Undo());
-        _InteractManager.OnClick_Redo
-            .Subscribe(_ => _AnnotationModel.Redo());
+        _InteractManager.OnCallUndo
+            .Subscribe(_ => _AnnotationModel.Undo()).AddTo(this);
+        _InteractManager.OnCallRedo
+            .Subscribe(_ => _AnnotationModel.Redo()).AddTo(this);
 
         //FileWindow to AnnotationModel 
         _FileWindow.OnSendValue
@@ -120,14 +120,15 @@ public class RxPresenter : MonoBehaviour
 
         _AnnotationModel
             .OnCreated_Log
-            .Subscribe(tuple => {
+            .Subscribe(tuple =>
+            {
                 var classId = tuple.ClassId;
                 var labelId = tuple.LabelId;
                 var position = tuple.Position;
                 var size = tuple.Size;
                 Debug.Log($"Set-ClassID:{classId},LabelID:{labelId} -Log");
                 _LabelObjectManager.CreateLabelObject(classId, labelId, position, size);
-                }).AddTo(this);
+            }).AddTo(this);
         _AnnotationModel
             .OnResized_Log
             .Subscribe(tuple =>

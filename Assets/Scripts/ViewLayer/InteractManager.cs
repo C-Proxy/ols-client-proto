@@ -19,6 +19,8 @@ public class InteractManager : MonoBehaviour
     ClassWindow _ClassWindow;
     [SerializeField]
     LabelEditor _LabelEditor;
+    [SerializeField]
+    EditWindow _EditWindow;
 
     const float SQR_DRAG_DISTANCE = 9;
 
@@ -39,16 +41,17 @@ public class InteractManager : MonoBehaviour
     public IObservable<LabelObject> OnActiveLabelChange => _ActiveLabel;
     Vector3 DragStartPosition;
 
-    public IObservable<Vector3> OnUpdate;
+    public IObservable<Vector3> OnUpdate_Mouse;
+    IObservable<Unit> OnUpdate_Unit;
     public IObservable<Vector3> OnMouseUp(int value) =>
-        OnUpdate.Where(_ => Input.GetMouseButtonUp(value));
+        OnUpdate_Mouse.Where(_ => Input.GetMouseButtonUp(value));
     public IObservable<Vector3> OnMouseDown(int value) =>
-        OnUpdate.Where(_ => Input.GetMouseButtonDown(value));
+        OnUpdate_Mouse.Where(_ => Input.GetMouseButtonDown(value));
     public IObservable<float> OnMouseScrolled =>
-        OnUpdate.Select(_ => Input.GetAxis("Mouse ScrollWheel"))
+        OnUpdate_Mouse.Select(_ => Input.GetAxis("Mouse ScrollWheel"))
             .Where(scroll => scroll != 0);
     public IObservable<Tuple<Vector3, float>> OnMouseDownMoved(int value) =>
-        OnUpdate.CombineLatest(OnMouseDown(value), (pos, start) => new Tuple<Vector3, float>(pos, (pos - start).sqrMagnitude));
+        OnUpdate_Mouse.CombineLatest(OnMouseDown(value), (pos, start) => new Tuple<Vector3, float>(pos, (pos - start).sqrMagnitude));
     public IObservable<Vector3> OnMouseDragBegin(int value) =>
         OnMouseDownMoved(value)
             .TakeUntil(OnMouseUp(value))
@@ -57,13 +60,42 @@ public class InteractManager : MonoBehaviour
             .Take(1)
             .RepeatUntilDestroy(this);
     public IObservable<Vector3> OnMouseDrag(int value) =>
-        OnUpdate
+        OnUpdate_Mouse
             .SkipUntil(OnMouseDragBegin(value))
             .TakeUntil(OnMouseUp(value))
             .RepeatUntilDestroy(this);
 
+    #region
+    BoolReactiveProperty _isEnable_Undo = new BoolReactiveProperty();
+    BoolReactiveProperty _isEnable_Redo = new BoolReactiveProperty();
+    BoolReactiveProperty _isEnable_Delete = new BoolReactiveProperty();
+    bool isEnable_Undo
+    {
+        get { return _isEnable_Undo.Value; }
+        set { _isEnable_Undo.Value = value; }
+    }
+    bool isEnable_Redo
+    {
+        get { return _isEnable_Redo.Value; }
+        set { _isEnable_Redo.Value = value; }
+    }
+    bool isEnable_Delete
+    {
+        get { return _isEnable_Delete.Value; }
+        set { _isEnable_Delete.Value = value; }
+    }
+    public void EnableButton_Undo(bool enable) => isEnable_Undo = enable;
+    public void EnableButton_Redo(bool enable) => isEnable_Redo = enable;
+    public void EnableButton_Delete(bool enable) => isEnable_Delete = enable;
+
+    public IObservable<Unit> OnCallUndo;
+    public IObservable<Unit> OnCallRedo;
+    public IObservable<Unit> OnCallDelete;
+    #endregion
     void Awake()
     {
+        OnUpdate_Unit = this.UpdateAsObservable();
+
         OnModeChange
             .Pairwise()
             .Subscribe(modes =>
@@ -78,7 +110,7 @@ public class InteractManager : MonoBehaviour
                     case State.Edit:
                         _LabelEditor.SetActive(false);
                         _LabelObjectManager.DefaultColorAll();
-                        EnableButton_Remove(false);
+                        EnableButton_Delete(false);
                         break;
                 }
                 switch (modes.Current)
@@ -95,20 +127,24 @@ public class InteractManager : MonoBehaviour
                     case State.Edit:
                         _LabelEditor.SetActive(true);
                         _LabelObjectManager.FocusActiveLabel();
-                        OnUpdate
+                        OnUpdate_Mouse
                             .TakeWhile(_ => Mode == State.Edit)
                             .Where(_ => Input.GetMouseButton(0) == false)
                             .Subscribe(mouse => Cursor.SetCursor(_LabelEditor.GetCursorTexture(mouse), Vector2.one * 16, CursorMode.Auto),
                             () => Cursor.SetCursor(null, Vector2.one * 16, CursorMode.Auto)
                             ).AddTo(this);
-                        EnableButton_Remove(true);
+                        EnableButton_Delete(true);
                         break;
                 }
             }).AddTo(this);
 
+        OnCallUndo = Observable.Merge(_EditWindow.OnClick_Undo, GetKeyCommandWithCtrl(KeyCode.Z).Where(_ => isEnable_Undo));
+        OnCallRedo = Observable.Merge(_EditWindow.OnClick_Redo, GetKeyCommandWithCtrl(KeyCode.Y).Where(_ => isEnable_Redo));
+        OnCallDelete = Observable.Merge(_EditWindow.OnClick_Delete, GetKeyCommand(KeyCode.Delete).Where(_ => isEnable_Delete));
+
         Mode = State.Default;
 
-        _Button_Remove.OnClickAsObservable()
+        OnCallDelete
             .Subscribe(_ =>
             {
                 ActiveLabel.Remove();
@@ -117,10 +153,10 @@ public class InteractManager : MonoBehaviour
     }
     public void Init()
     {
-        OnUpdate = this.UpdateAsObservable()
+        OnUpdate_Mouse = this.UpdateAsObservable()
             .Select(_ => (Vector3)_ActiveImage.GetLocalPosition(Input.mousePosition));
 
-        OnUpdate
+        OnUpdate_Mouse
             .Where(_ => Mode == State.Default)
             .Subscribe(mouse => ActiveLabel = _LabelObjectManager.GetNearestLabel(mouse)).AddTo(this);
 
@@ -130,6 +166,11 @@ public class InteractManager : MonoBehaviour
             {
                 ActiveLabel.ChangeClass(classId);
             }).AddTo(this);
+
+        _isEnable_Undo.Subscribe(enabled => _EditWindow.EnableButton_Undo(enabled)).AddTo(this);
+        _isEnable_Redo.Subscribe(enabled => _EditWindow.EnableButton_Redo(enabled)).AddTo(this);
+        _isEnable_Delete.Subscribe(enabled => _EditWindow.EnableButton_Delete(enabled)).AddTo(this);
+
     }
 
     public void OnDragCanvas(BaseEventData data)
@@ -164,17 +205,6 @@ public class InteractManager : MonoBehaviour
         }
     }
 
-    //------------Buttons--------------//
-    [SerializeField]
-    Button _Button_Remove, _Button_Undo, _Button_Redo;
-
-    public IObservable<Unit> OnClick_Undo => _Button_Undo.OnClickAsObservable();
-    public IObservable<Unit> OnClick_Redo => _Button_Redo.OnClickAsObservable();
-
-    public void EnableButton_Remove(bool enable) => _Button_Remove.interactable = enable;
-    public void EnableButton_Undo(bool enable) => _Button_Undo.interactable = enable;
-    public void EnableButton_Redo(bool enable) => _Button_Redo.interactable = enable;
-
 
     enum State
     {
@@ -184,4 +214,15 @@ public class InteractManager : MonoBehaviour
     }
     public void SetDefault() => Mode = State.Default;
     public void SetActiveLabel(LabelObject labelObject) => ActiveLabel = labelObject;
+
+    IObservable<Unit> GetKeyCommand(KeyCode key) => OnUpdate_Unit.Where(_ => Input.GetKeyDown(key) == true);
+    IObservable<Unit> GetKeyCommandWithCtrl(KeyCode key) =>
+    OnUpdate_Unit
+    .Select(_ => Input.GetKey(KeyCode.LeftApple) || Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.LeftCommand))
+    .SkipWhile(input => !input)
+    .TakeWhile(input => input)
+    .Where(_ => Input.GetKeyDown(key))
+    .Take(1)
+    .Select(_ => Unit.Default)
+    .RepeatUntilDestroy(this);
 }
