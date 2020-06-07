@@ -37,6 +37,7 @@ public class InteractManager : MonoBehaviour
         set { _ActiveLabel.Value = value; }
     }
     public IObservable<LabelObject> OnActiveLabelChange => _ActiveLabel;
+    Vector3 DragStartPosition;
 
     public IObservable<Vector3> OnUpdate;
     public IObservable<Vector3> OnMouseUp(int value) =>
@@ -89,7 +90,7 @@ public class InteractManager : MonoBehaviour
                         if (ActiveLabel != null)
                             ActiveLabel.SetActivate(false);
                         _LabelEditor.SetActive(true);
-                        _LabelObjectManager.DrawLabel(_ActiveImage.GetLocalPosition(Input.mousePosition));
+                        _LabelObjectManager.DrawLabel(_ActiveImage.GetLocalPosition(DragStartPosition));
                         break;
                     case State.Edit:
                         _LabelEditor.SetActive(true);
@@ -136,8 +137,8 @@ public class InteractManager : MonoBehaviour
         PointerEventData point = data as PointerEventData;
         if (point.pointerId != -1)
             return;
+        DragStartPosition = point.pressPosition;
         Mode = State.Draw;
-
     }
     public void OnClickCanvas(BaseEventData data)
     {
@@ -161,9 +162,6 @@ public class InteractManager : MonoBehaviour
                 }
                 break;
         }
-
-
-
     }
 
     //------------Buttons--------------//
