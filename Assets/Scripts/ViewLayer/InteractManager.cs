@@ -137,11 +137,11 @@ public class InteractManager : MonoBehaviour
                         break;
                 }
             }).AddTo(this);
-
-        OnCallUndo = Observable.Merge(_EditWindow.OnClick_Undo, GetKeyCommandWithCtrl(KeyCode.Z).Where(_ => isEnable_Undo));
-        OnCallRedo = Observable.Merge(_EditWindow.OnClick_Redo, GetKeyCommandWithCtrl(KeyCode.Y).Where(_ => isEnable_Redo));
-        OnCallDelete = Observable.Merge(_EditWindow.OnClick_Delete, GetKeyCommand(KeyCode.Delete).Where(_ => isEnable_Delete));
-
+        #region InputKeyCommands
+        OnCallUndo = Observable.Merge(_EditWindow.OnClick_Undo, OnPressKeyWithCmd(KeyCode.Z)).Where(_ => isEnable_Undo);
+        OnCallRedo = Observable.Merge(_EditWindow.OnClick_Redo, OnPressKeyWithCmd(KeyCode.Y), OnPressKeysWithCmd(KeyCode.LeftShift, KeyCode.Z)).Where(_ => isEnable_Redo);
+        OnCallDelete = Observable.Merge(_EditWindow.OnClick_Delete, OnPressKey(KeyCode.Delete)).Where(_ => isEnable_Delete);
+        #endregion
         Mode = State.Default;
 
         OnCallDelete
@@ -215,14 +215,31 @@ public class InteractManager : MonoBehaviour
     public void SetDefault() => Mode = State.Default;
     public void SetActiveLabel(LabelObject labelObject) => ActiveLabel = labelObject;
 
-    IObservable<Unit> GetKeyCommand(KeyCode key) => OnUpdate_Unit.Where(_ => Input.GetKeyDown(key) == true);
-    IObservable<Unit> GetKeyCommandWithCtrl(KeyCode key) =>
+    IObservable<Unit> OnPressKey(KeyCode key) => OnUpdate_Unit.Where(_ => Input.GetKeyDown(key) == true);
+    IObservable<Unit> OnPressKeys(KeyCode key1, KeyCode key2) =>
     OnUpdate_Unit
-    .Select(_ => Input.GetKey(KeyCode.LeftApple) || Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.LeftCommand))
+    .Select(_ => Input.GetKey(key1))
+    .SkipWhile(input => !input)
+    .TakeWhile(input => input)
+    .Where(_ => Input.GetKeyDown(key2))
+    .Select(_ => Unit.Default)
+    .RepeatUntilDestroy(this);
+    public IObservable<Unit> OnPressKeyWithCmd(KeyCode key) =>
+    OnUpdate_Unit
+    .Select(_ => GetCmdKey())
     .SkipWhile(input => !input)
     .TakeWhile(input => input)
     .Where(_ => Input.GetKeyDown(key))
-    .Take(1)
     .Select(_ => Unit.Default)
     .RepeatUntilDestroy(this);
+    public IObservable<Unit> OnPressKeysWithCmd(KeyCode key1, KeyCode key2) =>
+    OnUpdate_Unit
+    .Select(_ => GetCmdKey() && Input.GetKey(key1))
+    .SkipWhile(input => !input)
+    .TakeWhile(input => input)
+    .Where(_ => Input.GetKeyDown(key2))
+    .Select(_ => Unit.Default)
+    .RepeatUntilDestroy(this);
+
+    bool GetCmdKey() => Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.LeftControl);
 }
