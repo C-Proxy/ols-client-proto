@@ -139,7 +139,7 @@ public class InteractManager : MonoBehaviour
             }).AddTo(this);
         #region InputKeyCommands
         OnCallUndo = Observable.Merge(_EditWindow.OnClick_Undo, OnPressKeyWithCmd(KeyCode.Z)).Where(_ => isEnable_Undo);
-        OnCallRedo = Observable.Merge(_EditWindow.OnClick_Redo, OnPressKeyWithCmd(KeyCode.Y), OnPressKeysWithCmd(KeyCode.LeftShift, KeyCode.Z)).Where(_ => isEnable_Redo);
+        OnCallRedo = Observable.Merge(_EditWindow.OnClick_Redo, OnPressKeyWithCmd(KeyCode.Y), OnPressKeyWithCmdShift(KeyCode.Z)).Where(_ => isEnable_Redo);
         OnCallDelete = Observable.Merge(_EditWindow.OnClick_Delete, OnPressKey(KeyCode.Delete)).Where(_ => isEnable_Delete);
         #endregion
         Mode = State.Default;
@@ -232,14 +232,15 @@ public class InteractManager : MonoBehaviour
     .Where(_ => Input.GetKeyDown(key))
     .Select(_ => Unit.Default)
     .RepeatUntilDestroy(this);
-    public IObservable<Unit> OnPressKeysWithCmd(KeyCode key1, KeyCode key2) =>
+    public IObservable<Unit> OnPressKeyWithCmdShift(KeyCode key) =>
     OnUpdate_Unit
-    .Select(_ => GetCmdKey() && Input.GetKey(key1))
+    .Select(_ => GetCmdKey() && GetShiftKey())
     .SkipWhile(input => !input)
     .TakeWhile(input => input)
-    .Where(_ => Input.GetKeyDown(key2))
+    .Where(_ => Input.GetKeyDown(key))
     .Select(_ => Unit.Default)
     .RepeatUntilDestroy(this);
 
-    bool GetCmdKey() => Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.LeftControl);
+    bool GetCmdKey() => Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightCommand) || Input.GetKey(KeyCode.RightControl);
+    bool GetShiftKey() => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 }
