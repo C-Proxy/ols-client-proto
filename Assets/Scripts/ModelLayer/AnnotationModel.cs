@@ -6,6 +6,9 @@ using UniRx;
 using System.IO;
 using System.Linq;
 using System;
+using System.Drawing;
+using Shipwreck.Phash;
+using Shipwreck.Phash.Bitmaps;
 
 public class AnnotationModel : MonoBehaviour
 {
@@ -118,6 +121,12 @@ public class AnnotationModel : MonoBehaviour
             }).ToArray()
             ).ToArray());
     }
+    public Digest ComputeImageHash(string fileName)
+    {
+        var bitmap = (Bitmap)Image.FromFile(fileName);
+        return ImagePhash.ComputeDigest(bitmap.ToLuminanceImage());
+    }
+
     public void SaveLabels(string fileName)
     {
         if (fileName != "")
