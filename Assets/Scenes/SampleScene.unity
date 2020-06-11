@@ -1640,6 +1640,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Dropdown: {fileID: 1370378391}
+  _NextButton: {fileID: 1278907311}
+  _BackButton: {fileID: 2374987}
 --- !u!1 &390956218
 GameObject:
   m_ObjectHideFlags: 0
@@ -5245,7 +5247,7 @@ GameObject:
   - component: {fileID: 1927408802}
   - component: {fileID: 1927408803}
   m_Layer: 5
-  m_Name: Previous
+  m_Name: Back
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
