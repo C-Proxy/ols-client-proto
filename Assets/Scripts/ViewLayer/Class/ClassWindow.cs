@@ -67,7 +67,7 @@ public class ClassWindow : Window
     public void SelectElement(int index)
     {
         if (ClassElements.Length <= index)
-            index = 0;
+            return;
         ActiveElementSubject.OnNext(index);
         EnableCheck(index);
     }
