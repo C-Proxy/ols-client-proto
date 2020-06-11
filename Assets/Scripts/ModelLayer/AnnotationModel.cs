@@ -360,8 +360,8 @@ public class AnnotationModel : MonoBehaviour
         AnnotationModel _AnnotationModel;
 
         const int maxLength = 20;
-        ReactiveCollection<ActionLogInterface> UndoLogs = new ReactiveCollection<ActionLogInterface>();
-        ReactiveCollection<ActionLogInterface> RedoLogs = new ReactiveCollection<ActionLogInterface>();
+        ReactiveCollection<IActionLog> UndoLogs = new ReactiveCollection<IActionLog>();
+        ReactiveCollection<IActionLog> RedoLogs = new ReactiveCollection<IActionLog>();
 
         public IObservable<int> OnUndoCountChanged => UndoLogs.ObserveCountChanged();
         public IObservable<int> OnRedoCountChanged => RedoLogs.ObserveCountChanged();
@@ -385,18 +385,18 @@ public class AnnotationModel : MonoBehaviour
             RedoLogs.RemoveAt(cnt - 1);
             AddUndo(undo);
         }
-        public void AddUndo(ActionLogInterface action)
+        public void AddUndo(IActionLog action)
         {
             UndoLogs.Add(action);
             if (UndoLogs.Count > maxLength)
                 UndoLogs.RemoveAt(0);
         }
-        public void AddUndoWithClear(ActionLogInterface action)
+        public void AddUndoWithClear(IActionLog action)
         {
             ClearRedo();
             AddUndo(action);
         }
-        void AddRedo(ActionLogInterface action)
+        void AddRedo(IActionLog action)
         {
             RedoLogs.Add(action);
             if (RedoLogs.Count > maxLength)
@@ -413,20 +413,20 @@ public class AnnotationModel : MonoBehaviour
             RedoLogs.Clear();
         }
 
-        public struct CreateLog : ActionLogInterface
+        public struct CreateLog : IActionLog
         {
             int ClassId;
             int LabelId;
             Vector2 Positon;
             Vector2 Size;
 
-            public ActionLogInterface Undo(AnnotationModel model)
+            public IActionLog Undo(AnnotationModel model)
             {
                 model.RemoveLabelInfo_Log(ClassId, LabelId);
                 return new CreateLog(ClassId, LabelId, Positon, Size);
             }
 
-            public ActionLogInterface Redo(AnnotationModel model)
+            public IActionLog Redo(AnnotationModel model)
             {
                 model.CreateLabelInfo_Log(ClassId, LabelId, Positon, Size);
                 return new CreateLog(ClassId, LabelId, Positon, Size);
@@ -440,19 +440,19 @@ public class AnnotationModel : MonoBehaviour
                 Size = size;
             }
         }
-        public struct RemoveLog : ActionLogInterface
+        public struct RemoveLog : IActionLog
         {
             int ClassId;
             int LabelId;
             Vector2 Positon;
             Vector2 Size;
 
-            public ActionLogInterface Undo(AnnotationModel model)
+            public IActionLog Undo(AnnotationModel model)
             {
                 model.CreateLabelInfo_Log(ClassId, LabelId, Positon, Size);
                 return new RemoveLog(ClassId, LabelId, Positon, Size);
             }
-            public ActionLogInterface Redo(AnnotationModel model)
+            public IActionLog Redo(AnnotationModel model)
             {
                 model.RemoveLabelInfo_Log(ClassId, LabelId);
                 return new RemoveLog(ClassId, LabelId, Positon, Size);
@@ -465,7 +465,7 @@ public class AnnotationModel : MonoBehaviour
                 Size = size;
             }
         }
-        public struct ChangeClassLog : ActionLogInterface
+        public struct ChangeClassLog : IActionLog
         {
             int PreviousClassId;
             int PreviousLabelId;
@@ -473,12 +473,12 @@ public class AnnotationModel : MonoBehaviour
             int CurrentClassId;
             int CurrentLabelId;
 
-            public ActionLogInterface Undo(AnnotationModel model)
+            public IActionLog Undo(AnnotationModel model)
             {
                 model.ChangeClassLabelInfo_Log(CurrentClassId, CurrentLabelId, PreviousClassId, PreviousLabelId);
                 return this;
             }
-            public ActionLogInterface Redo(AnnotationModel model)
+            public IActionLog Redo(AnnotationModel model)
             {
                 model.ChangeClassLabelInfo_Log(PreviousClassId, PreviousLabelId, CurrentClassId, CurrentLabelId);
                 return this;
@@ -491,7 +491,7 @@ public class AnnotationModel : MonoBehaviour
                 CurrentLabelId = newLabelId;
             }
         }
-        public struct ResizeLog : ActionLogInterface
+        public struct ResizeLog : IActionLog
         {
             int ClassId;
             int LabelId;
@@ -502,12 +502,12 @@ public class AnnotationModel : MonoBehaviour
             Vector2 CurrentPosition;
             Vector2 CurrentSize;
 
-            public ActionLogInterface Undo(AnnotationModel model)
+            public IActionLog Undo(AnnotationModel model)
             {
                 model.ResizeLabelInfo_Log(ClassId, LabelId, PreviousPosition, PreviousSize);
                 return new ResizeLog(ClassId, LabelId, PreviousPosition, PreviousSize, CurrentPosition, CurrentSize);
             }
-            public ActionLogInterface Redo(AnnotationModel model)
+            public IActionLog Redo(AnnotationModel model)
             {
                 model.ResizeLabelInfo_Log(ClassId, LabelId, CurrentPosition, CurrentSize);
                 return new ResizeLog(ClassId, LabelId, PreviousPosition, PreviousSize, CurrentPosition, CurrentSize);
@@ -523,10 +523,10 @@ public class AnnotationModel : MonoBehaviour
             }
         }
 
-        public interface ActionLogInterface
+        public interface IActionLog
         {
-            ActionLogInterface Redo(AnnotationModel model);
-            ActionLogInterface Undo(AnnotationModel model);
+            IActionLog Redo(AnnotationModel model);
+            IActionLog Undo(AnnotationModel model);
         }
     }
     #endregion

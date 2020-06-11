@@ -19,8 +19,6 @@ public class InteractManager : MonoBehaviour
     ClassWindow _ClassWindow;
     [SerializeField]
     LabelEditor _LabelEditor;
-    [SerializeField]
-    EditWindow _EditWindow;
 
     const float SQR_DRAG_DISTANCE = 9;
 
@@ -65,32 +63,26 @@ public class InteractManager : MonoBehaviour
             .TakeUntil(OnMouseUp(value))
             .RepeatUntilDestroy(this);
 
-    #region
-    BoolReactiveProperty _isEnable_Undo = new BoolReactiveProperty();
-    BoolReactiveProperty _isEnable_Redo = new BoolReactiveProperty();
-    BoolReactiveProperty _isEnable_Delete = new BoolReactiveProperty();
-    bool isEnable_Undo
-    {
-        get { return _isEnable_Undo.Value; }
-        set { _isEnable_Undo.Value = value; }
-    }
-    bool isEnable_Redo
-    {
-        get { return _isEnable_Redo.Value; }
-        set { _isEnable_Redo.Value = value; }
-    }
-    bool isEnable_Delete
-    {
-        get { return _isEnable_Delete.Value; }
-        set { _isEnable_Delete.Value = value; }
-    }
+    bool isEnable_Undo;
+    bool isEnable_Redo;
+    bool isEnable_Delete;
+
     public void EnableButton_Undo(bool enable) => isEnable_Undo = enable;
     public void EnableButton_Redo(bool enable) => isEnable_Redo = enable;
     public void EnableButton_Delete(bool enable) => isEnable_Delete = enable;
 
-    public IObservable<Unit> OnCallUndo;
-    public IObservable<Unit> OnCallRedo;
-    public IObservable<Unit> OnCallDelete;
+    #region  InputObserbables
+    public IObservable<Unit> OnInputUndo;
+    public IObservable<Unit> OnInputRedo;
+    public IObservable<Unit> OnInputDelete;
+    public IObservable<int> OnInputNumber;
+    public IObservable<Arrow> OnInputArrowKey;
+    public IObservable<Unit> OnInputRight;
+
+    public enum Arrow
+    {
+        Up, Down, Right, Left, None
+    }
     #endregion
     void Awake()
     {
@@ -137,14 +129,40 @@ public class InteractManager : MonoBehaviour
                         break;
                 }
             }).AddTo(this);
+
         #region InputKeyCommands
-        OnCallUndo = Observable.Merge(_EditWindow.OnClick_Undo, OnPressKeyWithCmd(KeyCode.Z)).Where(_ => isEnable_Undo);
-        OnCallRedo = Observable.Merge(_EditWindow.OnClick_Redo, OnPressKeyWithCmd(KeyCode.Y), OnPressKeyWithCmdShift(KeyCode.Z)).Where(_ => isEnable_Redo);
-        OnCallDelete = Observable.Merge(_EditWindow.OnClick_Delete, OnPressKey(KeyCode.Delete)).Where(_ => isEnable_Delete);
+        OnInputUndo = OnPressKeyWithCmd(KeyCode.Z).Where(_ => isEnable_Undo);
+        OnInputRedo = Observable.Merge(OnPressKeyWithCmd(KeyCode.Y), OnPressKeyWithCmdShift(KeyCode.Z)).Where(_ => isEnable_Redo);
+        OnInputDelete = OnPressKey(KeyCode.Delete).Where(_ => isEnable_Delete);
+
+        OnInputNumber = OnUpdate_Unit
+        .Select(_ =>
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                if (Input.GetKeyDown(KeyCode.Alpha0 + i) || Input.GetKeyDown(KeyCode.Keypad0 + i))
+                    return i;
+            }
+            return -1;
+        })
+            .Where(value => value >= 0);
+
+        OnInputArrowKey = OnUpdate_Unit
+        .Select(_ =>
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                if (Input.GetKeyDown(KeyCode.UpArrow + i))
+                    return (Arrow)i;
+            }
+            return Arrow.None;
+        })
+        .Where(arrow => arrow != Arrow.None);
+
         #endregion
         Mode = State.Default;
 
-        OnCallDelete
+        OnInputDelete
             .Subscribe(_ =>
             {
                 ActiveLabel.Remove();
@@ -166,11 +184,6 @@ public class InteractManager : MonoBehaviour
             {
                 ActiveLabel.ChangeClass(classId);
             }).AddTo(this);
-
-        _isEnable_Undo.Subscribe(enabled => _EditWindow.EnableButton_Undo(enabled)).AddTo(this);
-        _isEnable_Redo.Subscribe(enabled => _EditWindow.EnableButton_Redo(enabled)).AddTo(this);
-        _isEnable_Delete.Subscribe(enabled => _EditWindow.EnableButton_Delete(enabled)).AddTo(this);
-
     }
 
     public void OnDragCanvas(BaseEventData data)

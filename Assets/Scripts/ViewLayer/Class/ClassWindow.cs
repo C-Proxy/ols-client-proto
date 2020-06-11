@@ -37,11 +37,7 @@ public class ClassWindow : Window
             ClassElements[j] = element;
             element.OnClick
             .Select(_ => j)
-            .Subscribe(index =>
-            {
-                ActiveElementSubject.OnNext(index);
-                EnableCheck(index);
-            }).AddTo(this);
+            .Subscribe(index => SelectElement(index)).AddTo(this);
         }
         EnableCheck(0);
     }
@@ -68,6 +64,13 @@ public class ClassWindow : Window
         ClassElements[index].SetCheck(true);
     }
 
+    public void SelectElement(int index)
+    {
+        if (ClassElements.Length <= index)
+            index = 0;
+        ActiveElementSubject.OnNext(index);
+        EnableCheck(index);
+    }
 }
 public static class ColorPalatte
 {
@@ -82,8 +85,9 @@ public static class ColorPalatte
         Color.cyan,
         new Color(1,0.5f,0),
         new Color(0,0.5f,0),
-        new Color(0.5f,0,1)
-    };
+        new Color(0.5f,0,1),
+        new Color(1,0.5f,0.5f)
+};
 
     public static Color GetColor(int index)
     {

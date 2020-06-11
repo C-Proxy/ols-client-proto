@@ -43,10 +43,10 @@ public class LabelObjectManager : MonoBehaviour
     Subject<(int ClassId, int LabelId)> RemoveLabelSubject = new Subject<(int ClassId, int LabelId)>();
     Subject<(int ClassId, int LabelId, int newClassId, int newLabelId)> ChangeClassSubject = new Subject<(int ClassId, int LabelId, int newClassId, int newLabelId)>();
 
-    public IObservable<(int ClassId, int LabelId, Vector2 Position, Vector2 Size)> OnCreatedLabel => CreateLabelSubject;
-    public IObservable<(int ClassId, int LabelId, Vector2 Position, Vector2 Size)> OnResizedLabel => ResizeLabelSubject;
+    public IObservable<(int ClassId, int LabelId, Vector2 Position, Vector2 Size)> OnCreateLabel => CreateLabelSubject;
+    public IObservable<(int ClassId, int LabelId, Vector2 Position, Vector2 Size)> OnResizeLabel => ResizeLabelSubject;
     public IObservable<(int ClassId, int LabelId)> OnRemoveLabel => RemoveLabelSubject;
-    public IObservable<(int ClassId, int LabelId, int newClassId, int newLabelId)> OnChangedClass => ChangeClassSubject;
+    public IObservable<(int ClassId, int LabelId, int newClassId, int newLabelId)> OnChangeClass => ChangeClassSubject;
 
     Vector2 ImageSize;
     public void SetImageSize(Vector2 size) => ImageSize = size;

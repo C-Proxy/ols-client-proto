@@ -2171,6 +2171,57 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 1
+--- !u!1 &734502500
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 734502501}
+  - component: {fileID: 734502502}
+  m_Layer: 0
+  m_Name: EditView
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &734502501
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 734502500}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1498930924}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &734502502
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 734502500}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ee4047a77ed0284f97871c83ab1e8aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _LabelObjectManager: {fileID: 1317995850}
+  _FileWindow: {fileID: 312633212}
+  _ClassWindow: {fileID: 1794508328}
+  _ActiveImage: {fileID: 2013632692}
+  _BaseCanvas: {fileID: 1913819429}
+  _AnnotationModel: {fileID: 390956219}
+  _InteractManager: {fileID: 1924749038}
+  _EditWindow: {fileID: 838077161}
 --- !u!1 &757273658
 GameObject:
   m_ObjectHideFlags: 0
@@ -2745,13 +2796,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8d891e3ea6f55049b1855df24eddbcd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _LabelObjectManager: {fileID: 1317995850}
-  _FileWindow: {fileID: 312633212}
-  _ClassWindow: {fileID: 1794508328}
-  _ActiveImage: {fileID: 2013632692}
-  _BaseCanvas: {fileID: 1913819429}
+  _EditView: {fileID: 734502502}
   _AnnotationModel: {fileID: 390956219}
-  _InteractManager: {fileID: 1924749038}
 --- !u!1 &869966106
 GameObject:
   m_ObjectHideFlags: 0
@@ -2842,7 +2888,7 @@ GameObject:
   - component: {fileID: 1017334617}
   - component: {fileID: 1017334616}
   m_Layer: 5
-  m_Name: RemoveButton
+  m_Name: DeleteButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4408,6 +4454,7 @@ Transform:
   - {fileID: 1924749039}
   - {fileID: 390956220}
   - {fileID: 863071201}
+  - {fileID: 734502501}
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -5173,9 +5220,6 @@ MonoBehaviour:
   _LabelObjectManager: {fileID: 1317995850}
   _ClassWindow: {fileID: 1794508328}
   _LabelEditor: {fileID: 155554325}
-  _Button_Remove: {fileID: 1017334617}
-  _Button_Undo: {fileID: 4529427}
-  _Button_Redo: {fileID: 56150910}
 --- !u!4 &1924749039
 Transform:
   m_ObjectHideFlags: 0

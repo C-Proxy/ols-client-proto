@@ -9,13 +9,15 @@ public class FileWindow : Window
 {
     [SerializeField]
     Dropdown Dropdown;
+    [SerializeField]
+    Button _NextButton, _BackButton;
+
+    public IObservable<Unit> OnClick_Next => _NextButton.OnClickAsObservable();
+    public IObservable<Unit> OnCkick_Back => _BackButton.OnClickAsObservable();
 
     Subject<string> SendValueSubject = new Subject<string>();
     public IObservable<string> OnSendValue => SendValueSubject.Merge(OnValueChanged);
     public IObservable<string> OnValueChanged => Dropdown.onValueChanged.AsObservable().Select(value => Dropdown.options[value].text);
-
-    public void OnButton_Next() => Dropdown.value++;
-    public void OnButton_Previous() => Dropdown.value--;
 
     public void Set(List<string> fileNames)
     {
@@ -26,4 +28,7 @@ public class FileWindow : Window
     {
         SendValueSubject.OnNext(Dropdown.options[Dropdown.value].text);
     }
+
+    public void Next() => Dropdown.value++;
+    public void Back() => Dropdown.value--;
 }
