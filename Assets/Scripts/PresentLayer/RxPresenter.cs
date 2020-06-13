@@ -39,7 +39,7 @@ public class RxPresenter : MonoBehaviour
             {
                 var classId = tuple.ClassId;
                 var labelId = tuple.LabelId;
-                Debug.Log($"Remove-ClassID:{classId},LabelID:{labelId}");
+                //Debug.Log($"Remove-ClassID:{classId},LabelID:{labelId}");
                 _AnnotationModel.RemoveLabelInfoWithLog(classId, labelId);
                 _EditView.RemoveLabel(classId, labelId);
             }).AddTo(this);
@@ -50,7 +50,7 @@ public class RxPresenter : MonoBehaviour
                 var labelId = tuple.LabelId;
                 var newClassId = tuple.NewClassId;
                 var newLabelId = tuple.NewLabelId;
-                Debug.Log($"ChangeClass-ClassID:{classId},LabelID:{labelId},newClassID:{newClassId},newLabelID:{newLabelId}");
+                //Debug.Log($"ChangeClass-ClassID:{classId},LabelID:{labelId},newClassID:{newClassId},newLabelID:{newLabelId}");
                 _AnnotationModel.ChangeClassLabelInfoWithLog(classId, labelId, newClassId, newLabelId);
                 _EditView.ChangeClass(classId, labelId, newClassId, newLabelId);
             }).AddTo(this);

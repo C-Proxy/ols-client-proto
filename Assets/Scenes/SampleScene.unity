@@ -5221,6 +5221,7 @@ MonoBehaviour:
   _ActiveImage: {fileID: 2013632692}
   _LabelObjectManager: {fileID: 1317995850}
   _ClassWindow: {fileID: 1794508328}
+  _EditWindow: {fileID: 838077161}
   _LabelEditor: {fileID: 155554325}
 --- !u!4 &1924749039
 Transform:

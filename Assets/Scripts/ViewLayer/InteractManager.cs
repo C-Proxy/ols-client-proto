@@ -18,6 +18,8 @@ public class InteractManager : MonoBehaviour
     [SerializeField]
     ClassWindow _ClassWindow;
     [SerializeField]
+    EditWindow _EditWindow;
+    [SerializeField]
     LabelEditor _LabelEditor;
 
     const float SQR_DRAG_DISTANCE = 9;
@@ -67,9 +69,21 @@ public class InteractManager : MonoBehaviour
     bool isEnable_Redo;
     bool isEnable_Delete;
 
-    public void EnableButton_Undo(bool enable) => isEnable_Undo = enable;
-    public void EnableButton_Redo(bool enable) => isEnable_Redo = enable;
-    public void EnableButton_Delete(bool enable) => isEnable_Delete = enable;
+    public void EnableButton_Undo(bool enable)
+    {
+        isEnable_Undo = enable;
+        _EditWindow.EnableButton_Undo(enable);
+    }
+    public void EnableButton_Redo(bool enable)
+    {
+        isEnable_Redo = enable;
+        _EditWindow.EnableButton_Redo(enable);
+    }
+    public void EnableButton_Delete(bool enable)
+    {
+        isEnable_Delete = enable;
+        _EditWindow.EnableButton_Delete(enable);
+    }
 
     #region  InputObserbables
     public IObservable<Unit> OnInputUndo;
@@ -234,8 +248,7 @@ public class InteractManager : MonoBehaviour
     .Where(_ => Input.GetKey(key1) && Input.GetKeyDown(key2));
     public IObservable<Unit> OnPressKeyWithCmd(KeyCode key) =>
     OnUpdate_Unit
-    .Where(_ => GetCmdKey() && Input.GetKey(key))
-    .Where(_ => Input.GetKeyDown(key));
+    .Where(_ => GetCmdKey() && !GetShiftKey() && Input.GetKeyDown(key));
     public IObservable<Unit> OnPressKeyWithCmdShift(KeyCode key) =>
     OnUpdate_Unit
     .Where(_ => GetCmdKey() && GetShiftKey() && Input.GetKeyDown(key));

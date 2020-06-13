@@ -98,7 +98,7 @@ public class EditView : MonoBehaviour
     }
     public void RemoveLabel(int classId, int labelId)
     {
-        Debug.Log($"Remove-ClassID:{classId},LabelID:{labelId} -Log");
+        Debug.Log($"Remove-ClassID:{classId},LabelID:{labelId}");
         _LabelObjectManager.RemoveLabelObject(classId, labelId);
     }
     public void ChangeClass(int classId, int labelId, int newClassId, int newLabelId)
@@ -110,11 +110,9 @@ public class EditView : MonoBehaviour
     public void EnableButton_Undo(bool enable)
     {
         _InteractManager.EnableButton_Undo(enable);
-        _EditWindow.EnableButton_Undo(enable);
     }
     public void EnableButton_Redo(bool enable)
     {
         _InteractManager.EnableButton_Redo(enable);
-        _EditWindow.EnableButton_Redo(enable);
     }
 }
