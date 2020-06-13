@@ -231,28 +231,14 @@ public class InteractManager : MonoBehaviour
     IObservable<Unit> OnPressKey(KeyCode key) => OnUpdate_Unit.Where(_ => Input.GetKeyDown(key) == true);
     IObservable<Unit> OnPressKeys(KeyCode key1, KeyCode key2) =>
     OnUpdate_Unit
-    .Select(_ => Input.GetKey(key1))
-    .SkipWhile(input => !input)
-    .TakeWhile(input => input)
-    .Where(_ => Input.GetKeyDown(key2))
-    .Select(_ => Unit.Default)
-    .RepeatUntilDestroy(this);
+    .Where(_ => Input.GetKey(key1) && Input.GetKeyDown(key2));
     public IObservable<Unit> OnPressKeyWithCmd(KeyCode key) =>
     OnUpdate_Unit
-    .Select(_ => GetCmdKey())
-    .SkipWhile(input => !input)
-    .TakeWhile(input => input)
-    .Where(_ => Input.GetKeyDown(key))
-    .Select(_ => Unit.Default)
-    .RepeatUntilDestroy(this);
+    .Where(_ => GetCmdKey() && Input.GetKey(key))
+    .Where(_ => Input.GetKeyDown(key));
     public IObservable<Unit> OnPressKeyWithCmdShift(KeyCode key) =>
     OnUpdate_Unit
-    .Select(_ => GetCmdKey() && GetShiftKey())
-    .SkipWhile(input => !input)
-    .TakeWhile(input => input)
-    .Where(_ => Input.GetKeyDown(key))
-    .Select(_ => Unit.Default)
-    .RepeatUntilDestroy(this);
+    .Where(_ => GetCmdKey() && GetShiftKey() && Input.GetKeyDown(key));
 
     bool GetCmdKey() => Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightCommand) || Input.GetKey(KeyCode.RightControl);
     bool GetShiftKey() => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
