@@ -10,10 +10,9 @@ using System.Linq;
 [RequireComponent(typeof(RectTransform))]
 public class LabelObject : MonoBehaviour
 {
-    [SerializeField]
-    Image _FillImage, _RimImage;
-    [SerializeField]
-    RectTransform _RectTransform, _MaskRecttransform;
+    [SerializeField] Image _FillImage = default;
+    [SerializeField] RectTransform _RectTransform = default;
+    [SerializeField] LabelRim _LabelRim;
 
     #region Rx
 
@@ -69,20 +68,16 @@ public class LabelObject : MonoBehaviour
     }
     public void ChangeColor_Default()
     {
-        _RimImage.color = Color;
+        _LabelRim.SetColor(Color);
         _FillImage.color = AlphaColor;
     }
     public void ChangeColor_Gray()
     {
-        _RimImage.color = GrayColor;
+        _LabelRim.SetColor(GrayColor);
     }
     public void SetActivate(bool active) => _FillImage.enabled = active;
 
-    public void SetFlameScale(float scale)
-    {
-        _MaskRecttransform.offsetMin = Vector2.one * scale;
-        _MaskRecttransform.offsetMax = Vector2.one * (-scale);
-    }
+    public void SetRimScale(float scale) => _LabelRim.SetRimScale(scale);
 
 
     public float? GetDistance(Vector2 mousePos)

@@ -33,6 +33,8 @@ public class LabelObjectManager : MonoBehaviour
     LabelObject ActiveLabel;
     int CurrentId;
 
+    float _RimWidth;
+
     public void SetCurrentId(int classId)
     {
         CurrentId = classId;
@@ -317,6 +319,7 @@ public class LabelObjectManager : MonoBehaviour
     {
         start = RectClamp(start);
         ActiveLabel = CreateLabelObject(start);
+        ActiveLabel.SetRimScale(_RimWidth);
         _InteractManager.OnUpdate_Mouse
             .TakeUntil(_InteractManager.OnMouseUp(0))
             .Subscribe(pos =>
@@ -354,9 +357,9 @@ public class LabelObjectManager : MonoBehaviour
     }
     public void SetFlameScaleAll(float scale)
     {
-        var fixedScale = FLAME_SCALE / scale;
+        _RimWidth = FLAME_SCALE / scale;
         foreach (var label in LabelObjects.SelectMany(_ => _).Where(l => l != null))
-            label.SetFlameScale(fixedScale);
+            label.SetRimScale(_RimWidth);
     }
 
     //関数
