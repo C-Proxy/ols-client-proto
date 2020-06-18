@@ -7,10 +7,9 @@ using System;
 
 public class FileWindow : Window
 {
-    [SerializeField]
-    Dropdown Dropdown;
-    [SerializeField]
-    Button _NextButton, _BackButton;
+    [SerializeField] Dropdown Dropdown = default;
+    [SerializeField] Button _NextButton = default;
+    [SerializeField] Button _BackButton = default;
 
     public IObservable<Unit> OnClick_Next => _NextButton.OnClickAsObservable();
     public IObservable<Unit> OnCkick_Back => _BackButton.OnClickAsObservable();

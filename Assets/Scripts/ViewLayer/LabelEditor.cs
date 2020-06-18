@@ -8,12 +8,9 @@ using System;
 
 public class LabelEditor : MonoBehaviour
 {
-    [SerializeField]
-    CanvasGroup _CanvasGroup;
-
+    [SerializeField] CanvasGroup _CanvasGroup = default;
     RectTransform _RectTransform;
-    [SerializeField]
-    Texture2D[] CursorTextures;
+    [SerializeField] Texture2D[] CursorTextures = default;
 
     Subject<int> DragSubject = new Subject<int>();
     public IObservable<int> OnBeginDrag => DragSubject;

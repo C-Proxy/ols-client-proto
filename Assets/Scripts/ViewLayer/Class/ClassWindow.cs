@@ -6,11 +6,8 @@ using System;
 
 public class ClassWindow : Window
 {
-    [SerializeField]
-    GameObject prefab_ClassElement;
-    [SerializeField]
-    Transform ClassContentTarget;
-
+    [SerializeField] GameObject prefab_ClassElement = default;
+    [SerializeField] Transform ClassContentTarget = default;
 
     Subject<int> ActiveElementSubject = new Subject<int>();
     public IObservable<int> OnAcitveElementChanged => ActiveElementSubject;

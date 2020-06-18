@@ -2,22 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using UniRx;
 using System;
 
 public class ActiveImage : MonoBehaviour
 {
-    [SerializeField]
-    Image _Image;
-    [SerializeField]
-    RectTransform _RectTransform;
-    [SerializeField]
-    EventTrigger _EventTrigger;
+    [SerializeField] Image _Image = default;
+    [SerializeField] RectTransform _RectTransform = default;
 
     Subject<Vector2> SizeChangeSubject = new Subject<Vector2>();
     public IObservable<Vector2> OnSizeChange => SizeChangeSubject;
-    
+
     public void Set(Sprite sprite)
     {
         var size = sprite.rect.size;

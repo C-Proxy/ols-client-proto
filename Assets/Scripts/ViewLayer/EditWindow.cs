@@ -7,8 +7,9 @@ using System;
 
 public class EditWindow : Window
 {
-    [SerializeField]
-    Button UndoButton, RedoButton, DeleteButton;
+    [SerializeField] Button UndoButton = default;
+    [SerializeField] Button RedoButton = default;
+    [SerializeField] Button DeleteButton = default;
 
     public IObservable<Unit> OnClick_Undo => UndoButton.OnClickAsObservable();
     public IObservable<Unit> OnClick_Redo => RedoButton.OnClickAsObservable();

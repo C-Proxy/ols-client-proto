@@ -11,10 +11,9 @@ public class EditView : MonoBehaviour
     [SerializeField] ClassWindow _ClassWindow = default;
     [SerializeField] ActiveImage _ActiveImage = default;
     [SerializeField] BaseCanvas _BaseCanvas = default;
-    [SerializeField] AnnotationModel _AnnotationModel = default;
     [SerializeField] InteractManager _InteractManager = default;
     [SerializeField] EditWindow _EditWindow = default;
-    [SerializeField] GammaSlider _GammaSlider;
+    [SerializeField] GammaSlider _GammaSlider = default;
 
     private void Awake()
     {

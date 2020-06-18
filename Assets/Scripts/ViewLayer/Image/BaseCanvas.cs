@@ -7,10 +7,8 @@ using UniRx.Diagnostics;
 
 public class BaseCanvas : MonoBehaviour
 {
-    [SerializeField]
-    RectTransform _RectTransform;
-    [SerializeField]
-    InteractManager _InteractManager;
+    [SerializeField] RectTransform _RectTransform = default;
+    [SerializeField] InteractManager _InteractManager = default;
 
     const float maxScale = 20f;
     const float minScale = 0.1f;

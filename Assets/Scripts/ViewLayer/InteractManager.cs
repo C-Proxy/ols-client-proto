@@ -11,16 +11,11 @@ using UniRx.Diagnostics;
 
 public class InteractManager : MonoBehaviour
 {
-    [SerializeField]
-    ActiveImage _ActiveImage;
-    [SerializeField]
-    LabelObjectManager _LabelObjectManager;
-    [SerializeField]
-    ClassWindow _ClassWindow;
-    [SerializeField]
-    EditWindow _EditWindow;
-    [SerializeField]
-    LabelEditor _LabelEditor;
+    [SerializeField] ActiveImage _ActiveImage = default;
+    [SerializeField] LabelObjectManager _LabelObjectManager = default;
+    [SerializeField] ClassWindow _ClassWindow = default;
+    [SerializeField] EditWindow _EditWindow = default;
+    [SerializeField] LabelEditor _LabelEditor = default;
 
     const float SQR_DRAG_DISTANCE = 9;
 

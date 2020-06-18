@@ -7,11 +7,9 @@ using System;
 
 public class ClassElement : MonoBehaviour
 {
-    [SerializeField]
-    Button _Button;
+    [SerializeField] Button _Button = default;
     Text _ButtonText;
-    [SerializeField]
-    Image _CheckImage;
+    [SerializeField] Image _CheckImage = default;
 
     public IObservable<Unit> OnClick => _Button.OnClickAsObservable();
 

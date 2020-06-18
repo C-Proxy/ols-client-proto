@@ -7,21 +7,14 @@ using UniRx;
 
 public class LabelObjectManager : MonoBehaviour
 {
-    [SerializeField]
-    GameObject prefab_LabelObject;
-    [SerializeField]
-    ActiveImage _ActiveImage;
-    [SerializeField]
-    Transform transform_Disposed;
+    [SerializeField] GameObject prefab_LabelObject = default;
+    [SerializeField] ActiveImage _ActiveImage = default;
+    [SerializeField] Transform transform_Disposed = default;
     Transform transform_ActiveImage => _ActiveImage.transform;
-    [SerializeField]
-    InteractManager _InteractManager;
-    [SerializeField]
-    LabelEditor _LabelEditor;
-    [SerializeField]
-    ClassWindow _ClassWindow;
-    [SerializeField]
-    BaseCanvas _BaseCanvas;
+    [SerializeField] InteractManager _InteractManager = default;
+    [SerializeField] LabelEditor _LabelEditor = default;
+    [SerializeField] ClassWindow _ClassWindow = default;
+    [SerializeField] BaseCanvas _BaseCanvas = default;
 
     const float FLAME_SCALE = 2f;
 
@@ -29,8 +22,7 @@ public class LabelObjectManager : MonoBehaviour
     Queue<int>[] EmptyIndexes;
     Queue<LabelObject> DisposedLabelObjects = new Queue<LabelObject>();
 
-    [SerializeField]
-    LabelObject ActiveLabel;
+    [SerializeField] LabelObject ActiveLabel = default;
     int CurrentId;
 
     float _RimWidth;

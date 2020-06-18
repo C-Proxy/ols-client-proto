@@ -12,7 +12,7 @@ public class LabelObject : MonoBehaviour
 {
     [SerializeField] Image _FillImage = default;
     [SerializeField] RectTransform _RectTransform = default;
-    [SerializeField] LabelRim _LabelRim;
+    [SerializeField] LabelRim _LabelRim = default;
 
     #region Rx
 

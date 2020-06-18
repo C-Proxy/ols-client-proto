@@ -7,10 +7,8 @@ using System.Linq;
 
 public class RxPresenter : MonoBehaviour
 {
-    [SerializeField]
-    EditView _EditView;
-    [SerializeField]
-    AnnotationModel _AnnotationModel;
+    [SerializeField] EditView _EditView = default;
+    [SerializeField] AnnotationModel _AnnotationModel = default;
     private void Start()
     {
         //LabelObjectManager to AnnotationModel
