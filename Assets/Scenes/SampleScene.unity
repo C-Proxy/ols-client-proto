@@ -2409,6 +2409,7 @@ MonoBehaviour:
   _AnnotationModel: {fileID: 390956219}
   _InteractManager: {fileID: 1924749038}
   _EditWindow: {fileID: 838077161}
+  _GammaSlider: {fileID: 2047318140}
 --- !u!1 &757273658
 GameObject:
   m_ObjectHideFlags: 0
@@ -2539,7 +2540,7 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-  - eventID: 13
+  - eventID: 2
     callback:
       m_PersistentCalls:
         m_Calls:
@@ -2696,7 +2697,7 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-  - eventID: 13
+  - eventID: 2
     callback:
       m_PersistentCalls:
         m_Calls:
@@ -4435,7 +4436,7 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 2
-  - eventID: 13
+  - eventID: 2
     callback:
       m_PersistentCalls:
         m_Calls:
@@ -5891,7 +5892,7 @@ GameObject:
   - component: {fileID: 2047318139}
   - component: {fileID: 2047318140}
   m_Layer: 5
-  m_Name: Slider
+  m_Name: GammaSlider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

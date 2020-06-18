@@ -6,22 +6,15 @@ using System;
 
 public class EditView : MonoBehaviour
 {
-    [SerializeField]
-    LabelObjectManager _LabelObjectManager;
-    [SerializeField]
-    FileWindow _FileWindow;
-    [SerializeField]
-    ClassWindow _ClassWindow;
-    [SerializeField]
-    ActiveImage _ActiveImage;
-    [SerializeField]
-    BaseCanvas _BaseCanvas;
-    [SerializeField]
-    AnnotationModel _AnnotationModel;
-    [SerializeField]
-    InteractManager _InteractManager;
-    [SerializeField]
-    EditWindow _EditWindow;
+    [SerializeField] LabelObjectManager _LabelObjectManager = default;
+    [SerializeField] FileWindow _FileWindow = default;
+    [SerializeField] ClassWindow _ClassWindow = default;
+    [SerializeField] ActiveImage _ActiveImage = default;
+    [SerializeField] BaseCanvas _BaseCanvas = default;
+    [SerializeField] AnnotationModel _AnnotationModel = default;
+    [SerializeField] InteractManager _InteractManager = default;
+    [SerializeField] EditWindow _EditWindow = default;
+    [SerializeField] GammaSlider _GammaSlider;
 
     private void Awake()
     {
@@ -80,6 +73,7 @@ public class EditView : MonoBehaviour
         _BaseCanvas.PositionReset();
         _InteractManager.SetDefault();
         _LabelObjectManager.SetImageSize(imageSize);
+        _GammaSlider.SetValue(1.0f);
     }
     public void SetFileNames(List<string> fileNames)
     {
