@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UniRx;
 using System;
+using UniRx.Diagnostics;
 
 public class BaseCanvas : MonoBehaviour
 {
@@ -36,8 +37,9 @@ public class BaseCanvas : MonoBehaviour
         _InteractManager.OnMouseScrolled
             .Subscribe(scroll => Scale *= 1 + scroll).AddTo(this);
         _InteractManager.OnMouseDrag(2)
-            .CombineLatest(_InteractManager.OnMouseDown(2).Select(pos => _RectTransform.position - Input.mousePosition), (pos1, pos2) => pos2 + Input.mousePosition)
-            .Subscribe(pos => _RectTransform.position = pos).AddTo(this);
+            .Select(_ => Input.mousePosition)
+            .Pairwise()
+            .Subscribe(pair => _RectTransform.position += pair.Current - pair.Previous).AddTo(this);
     }
 
     public void Resize(float scale) => _RectTransform.localScale = Vector3.one * scale;

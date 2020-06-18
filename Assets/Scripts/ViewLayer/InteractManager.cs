@@ -50,19 +50,12 @@ public class InteractManager : MonoBehaviour
     public IObservable<float> OnMouseScrolled =>
         OnUpdate_Mouse.Select(_ => Input.GetAxis("Mouse ScrollWheel"))
             .Where(scroll => scroll != 0);
-    public IObservable<Tuple<Vector3, float>> OnMouseDownMoved(int value) =>
-        OnUpdate_Mouse.CombineLatest(OnMouseDown(value), (pos, start) => new Tuple<Vector3, float>(pos, (pos - start).sqrMagnitude));
-    public IObservable<Vector3> OnMouseDragBegin(int value) =>
+    public IObservable<(Vector3 Current, Vector3 Start)> OnMouseDownMoved(int value) =>
+        OnUpdate_Mouse.CombineLatest(OnMouseDown(value), (current, start) => (current, start));
+    public IObservable<(Vector3 Current, Vector3 Start)> OnMouseDrag(int value) =>
         OnMouseDownMoved(value)
             .TakeUntil(OnMouseUp(value))
-            .Where(tuple => tuple.Item2 >= SQR_DRAG_DISTANCE)
-            .Select(tuple => tuple.Item1)
-            .Take(1)
-            .RepeatUntilDestroy(this);
-    public IObservable<Vector3> OnMouseDrag(int value) =>
-        OnUpdate_Mouse
-            .SkipUntil(OnMouseDragBegin(value))
-            .TakeUntil(OnMouseUp(value))
+            .Where(tuple => (tuple.Current - tuple.Start).sqrMagnitude >= SQR_DRAG_DISTANCE)
             .RepeatUntilDestroy(this);
 
     bool isEnable_Undo;
