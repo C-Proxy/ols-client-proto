@@ -68,7 +68,7 @@ public class EditView : MonoBehaviour
         _ActiveImage.Set(sprite);
         float xRatio = (float)Screen.width / width;
         float yRatio = (float)Screen.height / hight;
-        _BaseCanvas.Resize(xRatio > yRatio ? yRatio : xRatio);
+        _BaseCanvas.SetScale(xRatio > yRatio ? yRatio : xRatio);
         _BaseCanvas.PositionReset();
         _InteractManager.SetDefault();
         _LabelObjectManager.SetImageSize(imageSize);

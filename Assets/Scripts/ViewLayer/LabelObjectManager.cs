@@ -110,6 +110,7 @@ public class LabelObjectManager : MonoBehaviour
             list[index] = labelObject;
 
         labelObject.Init(positon, size, classId, index);
+        labelObject.SetRimScale(_RimWidth);
         labelObject.OnCreated
             .Subscribe(info => CreateLabelSubject.OnNext((classId, index, info.Position, info.Size))).AddTo(this);
         labelObject.OnResized
@@ -311,7 +312,6 @@ public class LabelObjectManager : MonoBehaviour
     {
         start = RectClamp(start);
         ActiveLabel = CreateLabelObject(start);
-        ActiveLabel.SetRimScale(_RimWidth);
         _InteractManager.OnUpdate_Mouse
             .TakeUntil(_InteractManager.OnMouseUp(0))
             .Subscribe(pos =>

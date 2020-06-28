@@ -28,7 +28,7 @@ public class BaseCanvas : MonoBehaviour
 
     private void Awake()
     {
-        OnChangedScale.Subscribe(scale => Resize(scale)).AddTo(this);
+        OnChangedScale.Subscribe(scale => _RectTransform.localScale = Vector3.one * scale).AddTo(this);
     }
     public void Init()
     {
@@ -40,6 +40,7 @@ public class BaseCanvas : MonoBehaviour
             .Subscribe(pair => _RectTransform.position += pair.Current - pair.Previous).AddTo(this);
     }
 
-    public void Resize(float scale) => _RectTransform.localScale = Vector3.one * scale;
+    public void SetScale(float scale) => Scale = scale;
+
     public void PositionReset() => _RectTransform.anchoredPosition = Vector2.zero;
 }
