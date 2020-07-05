@@ -32,15 +32,11 @@ public class BaseCanvas : MonoBehaviour
     }
     public void Init()
     {
-        _InteractManager.OnMouseScrolled
+        _InteractManager.OnMouseScroll
             .Subscribe(scroll => Scale *= 1 + scroll).AddTo(this);
-        _InteractManager.OnMouseDrag(2)
-            .Select(_ => Input.mousePosition)
-            .Pairwise()
-            .Subscribe(pair => _RectTransform.position += pair.Current - pair.Previous).AddTo(this);
+        _InteractManager.OnMouseDragDelta[2]
+            .Subscribe(delta => _RectTransform.position += delta).AddTo(this);
     }
-
     public void SetScale(float scale) => Scale = scale;
-
     public void PositionReset() => _RectTransform.anchoredPosition = Vector2.zero;
 }

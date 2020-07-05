@@ -36,23 +36,6 @@ public class InteractManager : MonoBehaviour
     public IObservable<LabelObject> OnActiveLabelChange => _ActiveLabel;
     Vector3 DragStartPosition;
 
-    public IObservable<Vector3> OnUpdate_Mouse;
-    IObservable<Unit> OnUpdate_Unit;
-    public IObservable<Vector3> OnMouseUp(int value) =>
-        OnUpdate_Mouse.Where(_ => Input.GetMouseButtonUp(value));
-    public IObservable<Vector3> OnMouseDown(int value) =>
-        OnUpdate_Mouse.Where(_ => Input.GetMouseButtonDown(value));
-    public IObservable<float> OnMouseScrolled =>
-        OnUpdate_Mouse.Select(_ => Input.GetAxis("Mouse ScrollWheel"))
-            .Where(scroll => scroll != 0);
-    public IObservable<(Vector3 Current, Vector3 Start)> OnMouseDownMoved(int value) =>
-        OnUpdate_Mouse.CombineLatest(OnMouseDown(value), (current, start) => (current, start));
-    public IObservable<(Vector3 Current, Vector3 Start)> OnMouseDrag(int value) =>
-        OnMouseDownMoved(value)
-            .TakeUntil(OnMouseUp(value))
-            .Where(tuple => (tuple.Current - tuple.Start).sqrMagnitude >= SQR_DRAG_DISTANCE)
-            .RepeatUntilDestroy(this);
-
     bool isEnable_Undo;
     bool isEnable_Redo;
     bool isEnable_Delete;
@@ -79,7 +62,20 @@ public class InteractManager : MonoBehaviour
     public IObservable<Unit> OnInputDelete;
     public IObservable<int> OnInputNumber;
     public IObservable<Arrow> OnInputArrowKey;
-    public IObservable<Unit> OnInputRight;
+
+    public IObservable<Unit> OnInputCtrl;
+    public IObservable<Unit> OnInputShift;
+    public IObservable<Unit> OnInputCtrlAndShift;
+    public IObservable<Vector3> OnUpdate_InputPosition;
+    public IObservable<Vector3> OnUpdate_CanvasPosition;
+    IObservable<Unit> OnUpdate_Unit;
+
+    public IObservable<Vector3>[] OnMouseUp = new IObservable<Vector3>[3];
+    public IObservable<Vector3>[] OnMouseDown = new IObservable<Vector3>[3];
+    public IObservable<float> OnMouseScroll;
+    public IObservable<Vector3>[] OnMouseDragDelta = new IObservable<Vector3>[3];
+    public IObservable<(Vector3 Current, Vector3 Start)>[] OnMouseDownMove_Canvas = new IObservable<(Vector3 Current, Vector3 Start)>[3];
+    public IObservable<(Vector3 Current, Vector3 Start)>[] OnMouseDrag_Canvas = new IObservable<(Vector3 Current, Vector3 Start)>[3];
 
     public enum Arrow
     {
@@ -89,6 +85,10 @@ public class InteractManager : MonoBehaviour
     void Awake()
     {
         OnUpdate_Unit = this.UpdateAsObservable();
+        OnUpdate_InputPosition = OnUpdate_Unit.Select(_ => Input.mousePosition).Publish().RefCount();
+        OnUpdate_CanvasPosition = OnUpdate_InputPosition
+            .Select(pos => (Vector3)_ActiveImage.GetLocalPosition(pos))
+            .Publish().RefCount();
 
         OnModeChange
             .Pairwise()
@@ -121,7 +121,7 @@ public class InteractManager : MonoBehaviour
                     case State.Edit:
                         _LabelEditor.SetActive(true);
                         _LabelObjectManager.FocusActiveLabel();
-                        OnUpdate_Mouse
+                        OnUpdate_CanvasPosition
                             .TakeWhile(_ => Mode == State.Edit)
                             .Where(_ => Input.GetMouseButton(0) == false)
                             .Subscribe(mouse => Cursor.SetCursor(_LabelEditor.GetCursorTexture(mouse), Vector2.one * 16, CursorMode.Auto),
@@ -133,33 +133,66 @@ public class InteractManager : MonoBehaviour
             }).AddTo(this);
 
         #region InputKeyCommands
-        OnInputUndo = OnPressKeyWithCmd(KeyCode.Z).Where(_ => isEnable_Undo);
-        OnInputRedo = Observable.Merge(OnPressKeyWithCmd(KeyCode.Y), OnPressKeyWithCmdShift(KeyCode.Z)).Where(_ => isEnable_Redo);
-        OnInputDelete = OnPressKey(KeyCode.Delete).Where(_ => isEnable_Delete);
+
+        OnInputCtrl = OnUpdate_Unit.Where(_ => !GetShiftKey() && GetCmdKey() == true).Publish().RefCount();
+        OnInputShift = OnUpdate_Unit.Where(_ => !GetCmdKey() && GetShiftKey() == true).Publish().RefCount();
+        OnInputCtrlAndShift = OnUpdate_Unit.Where(_ => GetCmdKey() && GetShiftKey() == true).Publish().RefCount();
+
+        OnInputUndo = OnPressKeyWithCmd(KeyCode.Z).Where(_ => isEnable_Undo).Publish().RefCount();
+        OnInputRedo = Observable.Merge(OnPressKeyWithCmd(KeyCode.Y), OnPressKeyWithCmdShift(KeyCode.Z)).Where(_ => isEnable_Redo).Publish().RefCount();
+        OnInputDelete = OnPressKey(KeyCode.Delete).Where(_ => isEnable_Delete).Publish().RefCount();
 
         OnInputNumber = OnUpdate_Unit
-        .Select(_ =>
-        {
-            for (int i = 0; i < 10; i++)
+            .Select(_ =>
             {
-                if (Input.GetKeyDown(KeyCode.Alpha0 + i) || Input.GetKeyDown(KeyCode.Keypad0 + i))
-                    return i;
-            }
-            return -1;
-        })
-            .Where(value => value >= 0);
-
+                for (int i = 0; i < 10; i++)
+                {
+                    if (Input.GetKeyDown(KeyCode.Alpha0 + i) || Input.GetKeyDown(KeyCode.Keypad0 + i))
+                        return i;
+                }
+                return -1;
+            })
+            .Where(value => value >= 0)
+            .Publish().RefCount();
         OnInputArrowKey = OnUpdate_Unit
-        .Select(_ =>
-        {
-            for (int i = 0; i < 4; i++)
+            .Select(_ =>
             {
-                if (Input.GetKeyDown(KeyCode.UpArrow + i))
-                    return (Arrow)i;
-            }
-            return Arrow.None;
-        })
-        .Where(arrow => arrow != Arrow.None);
+                for (int i = 0; i < 4; i++)
+                {
+                    if (Input.GetKeyDown(KeyCode.UpArrow + i))
+                        return (Arrow)i;
+                }
+                return Arrow.None;
+            })
+            .Where(arrow => arrow != Arrow.None)
+            .Publish().RefCount();
+        for (int i = 0; i < 3; i++)
+        {
+            var value = i;
+            OnMouseUp[i] = OnUpdate_CanvasPosition.Where(_ => Input.GetMouseButtonUp(value)).Publish().RefCount();
+
+            OnMouseDown[i] = OnUpdate_CanvasPosition.Where(_ => Input.GetMouseButtonDown(value)).Publish().RefCount();
+
+            OnMouseDownMove_Canvas[i] = OnUpdate_CanvasPosition.CombineLatest(OnMouseDown[value], (current, start) => (current, start)).Publish().RefCount();
+
+            OnMouseDrag_Canvas[i] = OnMouseDownMove_Canvas[i]
+                .TakeUntil(OnMouseUp[value])
+                .Where(tuple => (tuple.Current - tuple.Start).sqrMagnitude >= SQR_DRAG_DISTANCE)
+                .RepeatUntilDestroy(this)
+                .Publish().RefCount();
+
+            OnMouseDragDelta[i] = OnUpdate_InputPosition
+                .SkipUntil(OnMouseDown[value])
+                .TakeUntil(OnMouseUp[value])
+                .Pairwise()
+                .Select(pair => pair.Current - pair.Previous)
+                .RepeatUntilDestroy(this)
+                .Publish().RefCount();
+        }
+        OnMouseScroll = OnUpdate_Unit
+            .Select(_ => Input.GetAxis("Mouse ScrollWheel"))
+            .Where(scroll => scroll != 0)
+            .Publish().RefCount();
 
         #endregion
         Mode = State.Default;
@@ -173,19 +206,13 @@ public class InteractManager : MonoBehaviour
     }
     public void Init()
     {
-        OnUpdate_Mouse = this.UpdateAsObservable()
-            .Select(_ => (Vector3)_ActiveImage.GetLocalPosition(Input.mousePosition));
-
-        OnUpdate_Mouse
+        OnUpdate_CanvasPosition
             .Where(_ => Mode == State.Default)
             .Subscribe(mouse => ActiveLabel = _LabelObjectManager.GetNearestLabel(mouse)).AddTo(this);
 
         _ClassWindow.OnAcitveElementChanged
             .Where(_ => Mode == State.Edit)
-            .Subscribe(classId =>
-            {
-                ActiveLabel.ChangeClass(classId);
-            }).AddTo(this);
+            .Subscribe(classId => ActiveLabel.ChangeClass(classId)).AddTo(this);
     }
 
     public void OnDragCanvas(BaseEventData data)
@@ -220,7 +247,6 @@ public class InteractManager : MonoBehaviour
         }
     }
 
-
     enum State
     {
         Default,
@@ -231,15 +257,8 @@ public class InteractManager : MonoBehaviour
     public void SetActiveLabel(LabelObject labelObject) => ActiveLabel = labelObject;
 
     IObservable<Unit> OnPressKey(KeyCode key) => OnUpdate_Unit.Where(_ => Input.GetKeyDown(key) == true);
-    IObservable<Unit> OnPressKeys(KeyCode key1, KeyCode key2) =>
-    OnUpdate_Unit
-    .Where(_ => Input.GetKey(key1) && Input.GetKeyDown(key2));
-    public IObservable<Unit> OnPressKeyWithCmd(KeyCode key) =>
-    OnUpdate_Unit
-    .Where(_ => GetCmdKey() && !GetShiftKey() && Input.GetKeyDown(key));
-    public IObservable<Unit> OnPressKeyWithCmdShift(KeyCode key) =>
-    OnUpdate_Unit
-    .Where(_ => GetCmdKey() && GetShiftKey() && Input.GetKeyDown(key));
+    IObservable<Unit> OnPressKeyWithCmd(KeyCode key) => OnInputCtrl.Where(_ => Input.GetKeyDown(key));
+    IObservable<Unit> OnPressKeyWithCmdShift(KeyCode key) => OnInputCtrlAndShift.Where(_ => Input.GetKeyDown(key));
 
     bool GetCmdKey() => Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightCommand) || Input.GetKey(KeyCode.RightControl);
     bool GetShiftKey() => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);

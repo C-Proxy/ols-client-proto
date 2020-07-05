@@ -190,8 +190,8 @@ public class LabelObjectManager : MonoBehaviour
         var slice = (Slice)value;
         if (!Input.GetMouseButton(0))
             return;
-        var onLeftUp = _InteractManager.OnMouseUp(0);
-        var drag = _InteractManager.OnUpdate_Mouse.TakeUntil(onLeftUp);
+        var onLeftUp = _InteractManager.OnMouseUp[0];
+        var drag = _InteractManager.OnUpdate_CanvasPosition.TakeUntil(onLeftUp);
 
         var prePos = ActiveLabel.localPosition;
         var preSize = ActiveLabel.sizeDelta;
@@ -312,8 +312,8 @@ public class LabelObjectManager : MonoBehaviour
     {
         start = RectClamp(start);
         ActiveLabel = CreateLabelObject(start);
-        _InteractManager.OnUpdate_Mouse
-            .TakeUntil(_InteractManager.OnMouseUp(0))
+        _InteractManager.OnUpdate_CanvasPosition
+            .TakeUntil(_InteractManager.OnMouseUp[0])
             .Subscribe(pos =>
             {
                 ResizeActiveLabel(start, pos);
