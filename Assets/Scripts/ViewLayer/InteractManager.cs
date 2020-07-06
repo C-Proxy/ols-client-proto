@@ -40,6 +40,8 @@ public class InteractManager : MonoBehaviour
     bool isEnable_Redo;
     bool isEnable_Delete;
 
+    bool isInteractable;
+
     public void EnableButton_Undo(bool enable)
     {
         isEnable_Undo = enable;
@@ -84,7 +86,7 @@ public class InteractManager : MonoBehaviour
     #endregion
     void Awake()
     {
-        OnUpdate_Unit = this.UpdateAsObservable();
+        OnUpdate_Unit = this.UpdateAsObservable().Where(_ => isInteractable).Publish().RefCount();
         OnUpdate_InputPosition = OnUpdate_Unit.Select(_ => Input.mousePosition).Publish().RefCount();
         OnUpdate_CanvasPosition = OnUpdate_InputPosition
             .Select(pos => (Vector3)_ActiveImage.GetLocalPosition(pos))
@@ -255,6 +257,7 @@ public class InteractManager : MonoBehaviour
     }
     public void SetDefault() => Mode = State.Default;
     public void SetActiveLabel(LabelObject labelObject) => ActiveLabel = labelObject;
+    public void SetInteractable(bool interactable) => isInteractable = interactable;
 
     IObservable<Unit> OnPressKey(KeyCode key) => OnUpdate_Unit.Where(_ => Input.GetKeyDown(key) == true);
     IObservable<Unit> OnPressKeyWithCmd(KeyCode key) => OnInputCtrl.Where(_ => Input.GetKeyDown(key));

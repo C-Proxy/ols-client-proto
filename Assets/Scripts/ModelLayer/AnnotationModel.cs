@@ -15,10 +15,12 @@ public class AnnotationModel : MonoBehaviour
     List<LabelInfo?>[] LabelInfos;
 
     Subject<Texture2D> LoadImageSubject = new Subject<Texture2D>();
+    Subject<(Texture2D Loaded, Texture2D Similar)> LoadImageWithSimilarSubject = new Subject<(Texture2D LoadedImage, Texture2D SimilarImage)>();
     Subject<string[]> LoadClassNamesSubject = new Subject<string[]>();
     Subject<(Vector2 Position, Vector2 Size)[][]> LoadLabelsSubject = new Subject<(Vector2 Position, Vector2 Size)[][]>();
     Subject<List<(string FileName, bool isDone)>> LoadFilesSubject = new Subject<List<(string FileName, bool isDone)>>();
     public IObservable<Texture2D> OnLoadImage => LoadImageSubject;
+    public IObservable<(Texture2D Loaded, Texture2D Similar)> OnLoadImageWithSimilar => LoadImageWithSimilarSubject;
     public IObservable<string[]> OnLoadClassNames => LoadClassNamesSubject;
     public IObservable<(Vector2 Position, Vector2 Size)[][]> OnLoadLabels => LoadLabelsSubject;
     public IObservable<List<(string FileName, bool isDone)>> OnLoadFiles => LoadFilesSubject;

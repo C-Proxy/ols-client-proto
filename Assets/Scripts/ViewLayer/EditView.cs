@@ -14,6 +14,7 @@ public class EditView : MonoBehaviour
     [SerializeField] InteractManager _InteractManager = default;
     [SerializeField] EditWindow _EditWindow = default;
     [SerializeField] GammaSlider _GammaSlider = default;
+    [SerializeField] ComparisonWindow _ComparisonWindow = default;
 
     private void Awake()
     {
@@ -59,7 +60,7 @@ public class EditView : MonoBehaviour
         for (int i = labelInfos.Length - 1; i >= 0; i--)
             _LabelObjectManager.CreateLabelObject(i, labelInfos[i]);
     }
-    public void SetImage(Texture2D texture)
+    public Sprite SetImage(Texture2D texture)
     {
         var width = texture.width;
         var hight = texture.height;
@@ -73,12 +74,33 @@ public class EditView : MonoBehaviour
         _InteractManager.SetDefault();
         _LabelObjectManager.SetImageSize(imageSize);
         _GammaSlider.SetValue(1.0f);
+        return sprite;
+    }
+    public void SetImageWithSimilar(Texture2D loadTexture, Texture2D similarTexture)
+    {
+        _ComparisonWindow.SetEnable(true);
+        var loadedSprite = SetImage(loadTexture);
+        var similarSprite = Sprite.Create(similarTexture, new Rect(Vector2.zero, new Vector2(similarTexture.width, similarTexture.height)), Vector2.zero);
+        _ComparisonWindow.SetSprites(loadedSprite, similarSprite);
+        SetInteractable(false);
+        _ComparisonWindow.OnClick
+            .First()
+            .Subscribe(isContinue =>
+            {
+                if (!isContinue)
+                    _FileWindow.Next();
+            },
+            () =>
+            {
+                _ComparisonWindow.SetEnable(false);
+                SetInteractable(true);
+            }).AddTo(this);
+
     }
     public void SetFileNames(List<(string FileName, bool isDone)> fileNames)
     {
         _FileWindow.Set(fileNames);
     }
-
     public void CreateLabel(int classId, int labelId, Vector2 position, Vector2 size)
     {
         Debug.Log($"Set-ClassID:{classId},LabelID:{labelId} -Log");
@@ -107,5 +129,13 @@ public class EditView : MonoBehaviour
     public void EnableButton_Redo(bool enable)
     {
         _InteractManager.EnableButton_Redo(enable);
+    }
+    public void SetInteractable(bool interactable)
+    {
+        _FileWindow.SetInteractable(interactable);
+        _ClassWindow.SetInteractable(interactable);
+        _EditWindow.SetInteractable(interactable);
+        _GammaSlider.SetInteractable(interactable);
+        _InteractManager.SetInteractable(interactable);
     }
 }

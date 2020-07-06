@@ -77,6 +77,8 @@ public class RxPresenter : MonoBehaviour
             .Subscribe(tuples => _EditView.SetLabels(tuples)).AddTo(this);
         _AnnotationModel.OnLoadImage
             .Subscribe(texture => _EditView.SetImage(texture)).AddTo(this);
+        _AnnotationModel.OnLoadImageWithSimilar
+            .Subscribe(textures => _EditView.SetImageWithSimilar(textures.Loaded, textures.Similar)).AddTo(this);
         _AnnotationModel.OnLoadFiles
             .Subscribe(names => _EditView.SetFileNames(names)).AddTo(this);
 

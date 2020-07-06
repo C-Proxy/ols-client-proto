@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class Window : MonoBehaviour
 {
+    [SerializeField] CanvasGroup _CanvasGroup = default;
     Vector3 _deltaPos;
     public void OnBeginDrag()
     {
@@ -14,5 +15,6 @@ public class Window : MonoBehaviour
     {
         transform.position = Input.mousePosition + _deltaPos;
     }
+    public void SetInteractable(bool interactable) => _CanvasGroup.interactable = interactable;
 }
 
