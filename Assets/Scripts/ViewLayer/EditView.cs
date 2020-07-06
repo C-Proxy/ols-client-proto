@@ -74,7 +74,7 @@ public class EditView : MonoBehaviour
         _LabelObjectManager.SetImageSize(imageSize);
         _GammaSlider.SetValue(1.0f);
     }
-    public void SetFileNames(List<string> fileNames)
+    public void SetFileNames(List<(string FileName, bool isDone)> fileNames)
     {
         _FileWindow.Set(fileNames);
     }

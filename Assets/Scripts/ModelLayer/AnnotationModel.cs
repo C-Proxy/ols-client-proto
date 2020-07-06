@@ -17,11 +17,11 @@ public class AnnotationModel : MonoBehaviour
     Subject<Texture2D> LoadImageSubject = new Subject<Texture2D>();
     Subject<string[]> LoadClassNamesSubject = new Subject<string[]>();
     Subject<(Vector2 Position, Vector2 Size)[][]> LoadLabelsSubject = new Subject<(Vector2 Position, Vector2 Size)[][]>();
-    Subject<List<string>> LoadFilesSubject = new Subject<List<string>>();
+    Subject<List<(string FileName, bool isDone)>> LoadFilesSubject = new Subject<List<(string FileName, bool isDone)>>();
     public IObservable<Texture2D> OnLoadImage => LoadImageSubject;
     public IObservable<string[]> OnLoadClassNames => LoadClassNamesSubject;
     public IObservable<(Vector2 Position, Vector2 Size)[][]> OnLoadLabels => LoadLabelsSubject;
-    public IObservable<List<string>> OnLoadFiles => LoadFilesSubject;
+    public IObservable<List<(string FileName, bool isDone)>> OnLoadFiles => LoadFilesSubject;
 
     string CurrentFileName;
 
@@ -300,16 +300,24 @@ public class AnnotationModel : MonoBehaviour
             }
             return false;
         }
-        public List<string> LoadFileInfos()
+        public List<(string FileName, bool isDone)> LoadFileInfos()
         {
             var list = new List<FileInfo>();
-            DirectoryInfo dir = new DirectoryInfo(ImagePath);
+            DirectoryInfo imgDir = new DirectoryInfo(ImagePath);
             foreach (var ext in SupportedExtension)
             {
-                list.AddRange(dir.GetFiles(ext));
+                list.AddRange(imgDir.GetFiles(ext));
             }
             FileInfos = list.ToArray();
-            return list.Select(info => info.Name).ToList();
+            return FileInfos.Select(info =>
+            {
+                var fileName = info.Name;
+                var sb = new StringBuilder();
+                sb.Append(OutputPath);
+                sb.Append(fileName);
+                sb.Append(".csv");
+                return (fileName, File.Exists(sb.ToString()));
+            }).ToList();
         }
     }
 
