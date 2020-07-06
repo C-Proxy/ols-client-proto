@@ -40,7 +40,7 @@ public class InteractManager : MonoBehaviour
     bool isEnable_Redo;
     bool isEnable_Delete;
 
-    bool isInteractable;
+    bool isInteractable = true;
 
     public void EnableButton_Undo(bool enable)
     {
@@ -219,6 +219,9 @@ public class InteractManager : MonoBehaviour
 
     public void OnDragCanvas(BaseEventData data)
     {
+        if (!isInteractable)
+            return;
+
         PointerEventData point = data as PointerEventData;
         if (point.pointerId != -1)
             return;
@@ -227,6 +230,9 @@ public class InteractManager : MonoBehaviour
     }
     public void OnClickCanvas(BaseEventData data)
     {
+        if (!isInteractable)
+            return;
+
         var point = data as PointerEventData;
         if (point.pointerId != -1)
             return;

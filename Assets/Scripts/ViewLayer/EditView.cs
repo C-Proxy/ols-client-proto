@@ -15,6 +15,7 @@ public class EditView : MonoBehaviour
     [SerializeField] EditWindow _EditWindow = default;
     [SerializeField] GammaSlider _GammaSlider = default;
     [SerializeField] ComparisonWindow _ComparisonWindow = default;
+    [SerializeField] DialogWindow _DialogWindow = default;
 
     private void Awake()
     {
@@ -29,6 +30,9 @@ public class EditView : MonoBehaviour
 
         _InteractManager.OnInputNumber
         .Subscribe(index => _ClassWindow.SelectElement(index != 0 ? index - 1 : 10)).AddTo(this);
+
+        _FileWindow.OnInvalidLoad
+            .Subscribe(isLast => PopDialog(isLast ? "最後の画像に到達しました" : "最初の画像に到達しました")).AddTo(this);
     }
     public void Init()
     {
@@ -130,7 +134,22 @@ public class EditView : MonoBehaviour
     {
         _InteractManager.EnableButton_Redo(enable);
     }
-    public void SetInteractable(bool interactable)
+    void PopDialog(string msg)
+    {
+        SetInteractable(false);
+        _DialogWindow.SetEnable(true);
+        _DialogWindow.SetMessage(msg);
+
+        _DialogWindow.OnClick_OK
+            .First()
+            .Subscribe(_ =>
+          {
+              SetInteractable(true);
+              _DialogWindow.SetEnable(false);
+          }).AddTo(this);
+
+    }
+    void SetInteractable(bool interactable)
     {
         _FileWindow.SetInteractable(interactable);
         _ClassWindow.SetInteractable(interactable);

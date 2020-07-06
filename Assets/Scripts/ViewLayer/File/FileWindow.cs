@@ -18,8 +18,10 @@ public class FileWindow : Window
     public IObservable<Unit> OnCkick_Back => _BackButton.OnClickAsObservable();
 
     Subject<int> SendValueSubject = new Subject<int>();
+    Subject<bool> InvalidLoadSubject = new Subject<bool>();
     public IObservable<string> OnSendValue => SendValueSubject.Merge(OnValueChanged).Select(index => Elements[index].FileName);
     public IObservable<int> OnValueChanged => Dropdown.onValueChanged.AsObservable();
+    public IObservable<bool> OnInvalidLoad => InvalidLoadSubject;
 
     public void Set(List<(string FileName, bool isDone)> fileTuples)
     {
@@ -34,8 +36,20 @@ public class FileWindow : Window
         SendValueSubject.OnNext(Dropdown.value);
     }
 
-    public void Next() => Dropdown.value++;
-    public void Back() => Dropdown.value--;
+    public void Next()
+    {
+        if (Dropdown.value + 1 == Elements.Count)
+            InvalidLoadSubject.OnNext(true);
+        else
+            Dropdown.value++;
+    }
+    public void Back()
+    {
+        if (Dropdown.value == 0)
+            InvalidLoadSubject.OnNext(false);
+        else
+            Dropdown.value--;
+    }
 
     struct DropDownElement
     {
