@@ -1834,7 +1834,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _CanvasGroup: {fileID: 312633213}
-  Dropdown: {fileID: 1370378391}
+  _Dropdown: {fileID: 1370378391}
   _NextButton: {fileID: 1278907311}
   _BackButton: {fileID: 2374987}
 --- !u!225 &312633213
