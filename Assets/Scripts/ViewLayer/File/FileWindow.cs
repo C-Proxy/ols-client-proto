@@ -8,7 +8,7 @@ using System.Linq;
 
 public class FileWindow : Window
 {
-    [SerializeField] Dropdown Dropdown = default;
+    [SerializeField] Dropdown _Dropdown = default;
     [SerializeField] Button _NextButton = default;
     [SerializeField] Button _BackButton = default;
 
@@ -19,44 +19,72 @@ public class FileWindow : Window
 
     Subject<int> SendValueSubject = new Subject<int>();
     Subject<bool> InvalidLoadSubject = new Subject<bool>();
-    public IObservable<string> OnSendValue => SendValueSubject.Merge(OnValueChanged).Select(index => Elements[index].FileName);
-    public IObservable<int> OnValueChanged => Dropdown.onValueChanged.AsObservable();
+    public IObservable<(int Previous, int Current)> OnSendIndex;
+    public IObservable<(string Previous, string Current)> OnSendValue => OnSendIndex.Select(pair => (Elements[pair.Previous].FileName, Elements[pair.Current].FileName));
+    public IObservable<int> OnValueChanged => _Dropdown.onValueChanged.AsObservable();
     public IObservable<bool> OnInvalidLoad => InvalidLoadSubject;
+
+    private void Awake()
+    {
+        OnSendIndex = SendValueSubject.Merge(OnValueChanged).Pairwise().Select(pair => (pair.Previous, pair.Current)).Publish().RefCount();
+        OnSendIndex.Subscribe(pair => SetDone(pair.Previous)).AddTo(this);
+    }
 
     public void Set(List<(string FileName, bool isDone)> fileTuples)
     {
         Elements.Clear();
         Elements = fileTuples.Select(tuple => new DropDownElement(tuple.FileName, tuple.isDone)).ToList();
         var fileNames = Elements.Select(element => element.ToString()).ToList();
-        Dropdown.ClearOptions();
-        Dropdown.AddOptions(fileNames);
+        _Dropdown.ClearOptions();
+        _Dropdown.AddOptions(fileNames);
     }
     public void SendValue()
     {
-        SendValueSubject.OnNext(Dropdown.value);
+        SendValueSubject.OnNext(_Dropdown.value);
     }
 
     public void Next()
     {
-        if (Dropdown.value + 1 == Elements.Count)
+        if (_Dropdown.value + 1 == Elements.Count)
             InvalidLoadSubject.OnNext(true);
         else
-            Dropdown.value++;
+            _Dropdown.value++;
     }
     public void Back()
     {
-        if (Dropdown.value == 0)
+        if (_Dropdown.value == 0)
             InvalidLoadSubject.OnNext(false);
         else
-            Dropdown.value--;
+            _Dropdown.value--;
     }
-
+    void SetDone(int index)
+    {
+        var element = Elements[index];
+        if (element.IsDone)
+            return;
+        var eName = element.FileName;
+        Elements[index] = new DropDownElement(eName, true);
+        SetOptionToDropdown(index, Elements[index].ToString());
+    }
+    void SetOptionToDropdown(int index, string text)
+    {
+        if ((index >= 0) && index < _Dropdown.options.Count)
+        {
+            _Dropdown.options.RemoveAt(index);
+            _Dropdown.options.Insert(index, new Dropdown.OptionData { text = text });
+            _Dropdown.RefreshShownValue();
+        }
+        else
+        {
+            Debug.LogWarning($"予期せぬファイルリストを削除しようとしました。index:{index}");
+        }
+    }
     struct DropDownElement
     {
         const string TRUE_PREFIX = "[済]";
         const string FALSE_PREFIX = "[  ]";
         public string FileName;
-        bool IsDone;
+        public bool IsDone;
         public DropDownElement(string fileName, bool isDone)
         {
             FileName = fileName;

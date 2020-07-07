@@ -51,7 +51,7 @@ public class EditView : MonoBehaviour
     public IObservable<Unit> OnCallRedo;
     public IObservable<Unit> OnCallDelete;
 
-    public IObservable<string> OnSendFileName => _FileWindow.OnSendValue;
+    public IObservable<(string Previous, string Current)> OnSendFileName => _FileWindow.OnSendValue;
 
     public void SetClassNames(string[] names)
     {

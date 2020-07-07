@@ -61,7 +61,6 @@ public class RxPresenter : MonoBehaviour
 
         //FileWindow to AnnotationModel 
         _EditView.OnSendFileName
-            .Pairwise()
             .Subscribe(fileNames =>
             {
                 Debug.Log($"Open-Prevous:{fileNames.Previous},Current:{fileNames.Current}");
@@ -110,4 +109,3 @@ public class RxPresenter : MonoBehaviour
 
     }
 }
-
