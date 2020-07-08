@@ -398,6 +398,15 @@ public class LabelObjectManager : MonoBehaviour
         return index;
     }
 
+    public bool HasLabelObject()
+    {
+        foreach (var list in LabelObjects)
+        {
+            if (list.Count > 0)
+                return true;
+        }
+        return false;
+    }
     public enum Slice
     {
         LeftTop,

@@ -216,11 +216,7 @@ public class AnnotationModel : MonoBehaviour
             foreach (var list in labelInfos)
                 list.Clear();
 
-            var sb = new StringBuilder();
-            sb.Append(OutputPath);
-            sb.Append(fileName);
-            sb.Append(".csv");
-            var path = sb.ToString();
+            var path = GetCsvPath(fileName);
             if (!File.Exists(path))
                 return;
             Debug.Log($"{path}からラベルデータを読み込み。");
@@ -243,16 +239,11 @@ public class AnnotationModel : MonoBehaviour
         {
             var text = ConvertToCsv(labels);
 
-            StreamWriter sw;
-            var filePath = new StringBuilder();
-            filePath.Append(OutputPath);
-            filePath.Append(fileName);
-            filePath.Append(".csv");
-            var path = filePath.ToString();
+            var path = GetCsvPath(fileName);
             var fileInfo = new FileInfo(path);
 
             RemoveFile(path);
-
+            StreamWriter sw;
             sw = fileInfo.AppendText();
             sw.WriteLine(text);
             sw.Flush();
@@ -320,6 +311,14 @@ public class AnnotationModel : MonoBehaviour
                 sb.Append(".csv");
                 return (fileName, File.Exists(sb.ToString()));
             }).ToList();
+        }
+        string GetCsvPath(string fileName)
+        {
+            var filePath = new StringBuilder();
+            filePath.Append(OutputPath);
+            filePath.Append(fileName);
+            filePath.Append(".csv");
+            return filePath.ToString();
         }
     }
 

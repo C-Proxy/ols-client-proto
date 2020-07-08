@@ -19,16 +19,11 @@ public class FileWindow : Window
 
     Subject<int> SendValueSubject = new Subject<int>();
     Subject<bool> InvalidLoadSubject = new Subject<bool>();
-    public IObservable<(int Previous, int Current)> OnSendIndex;
-    public IObservable<(string Previous, string Current)> OnSendValue => OnSendIndex.Select(pair => (Elements[pair.Previous].FileName, Elements[pair.Current].FileName));
+    public IObservable<(int Index, string FileName)> OnSendValue =>
+        SendValueSubject.Merge(OnValueChanged)
+            .Select(index => (index, Elements[index].FileName));
     public IObservable<int> OnValueChanged => _Dropdown.onValueChanged.AsObservable();
     public IObservable<bool> OnInvalidLoad => InvalidLoadSubject;
-
-    private void Awake()
-    {
-        OnSendIndex = SendValueSubject.Merge(OnValueChanged).Pairwise().Select(pair => (pair.Previous, pair.Current)).Publish().RefCount();
-        OnSendIndex.Subscribe(pair => SetDone(pair.Previous)).AddTo(this);
-    }
 
     public void Set(List<(string FileName, bool isDone)> fileTuples)
     {
@@ -57,7 +52,7 @@ public class FileWindow : Window
         else
             _Dropdown.value--;
     }
-    void SetDone(int index)
+    public void SetDone(int index)
     {
         var element = Elements[index];
         if (element.IsDone)
